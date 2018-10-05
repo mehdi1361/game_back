@@ -1,0 +1,12 @@
+venv/
+venv/*
+/venv/
+/venv/*
+.idea/
+.idea/*
+/.idea/
+/.idea/*
+static/
+/static/
+static/*
+/static/*
