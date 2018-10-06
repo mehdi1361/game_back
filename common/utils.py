@@ -25,3 +25,24 @@ class Kavenegar:
             return True
 
         return False
+
+
+class Inline:
+    def __init__(self, mobile_nu, message):
+        self.mobile = mobile_nu
+        self.message = message
+
+    def run(self):
+        url = "http://sitenevis.com/gameport.php"
+        querystring = {"phone": self.mobile, "body": self.message}
+
+        headers = {
+            'cache-control': "no-cache"
+        }
+
+        response = requests.request("GET", url, headers=headers, params=querystring)
+
+        if response.text == '1':
+            return True
+
+        return False

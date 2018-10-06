@@ -4,20 +4,24 @@ import random
 from datetime import datetime, timedelta
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import User
+from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, status, filters, mixins
 from rest_framework.permissions import AllowAny
 
 from rest_framework.decorators import list_route
 from rest_framework.response import Response
+
+from common.payment import FactoryStore
 from user_info.models import Profile
 from rest_framework.exceptions import PermissionDenied
 
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
-from .serializers import UserSerializer, ProfileSerializer
-from common.utils import Kavenegar
+from .serializers import UserSerializer, ProfileSerializer, ShopSerializer
+from common.utils import Inline
 from user_info.models import Device, Verification
+from system.models import Shop, Store, PurchaseLog
 
 
 def mobile_verified():
@@ -93,21 +97,40 @@ class ProfileViewSet(DefaultsMixin, AuthMixin, mixins.RetrieveModelMixin,
 
     @list_route(methods=['POST'])
     @mobile_verified()
-    def set_player_name(self, request):
-        name = request.data.get('name')
-        user_profile = Profile.objects.filter(name=name)
+    def set_profile(self, request):
+        try:
+            name = request.data.get('name')
+            class_num = request.data.get('class_num')
+            first_name = request.data.get('first_name')
+            last_name = request.data.get('last_name')
 
-        if user_profile.count() > 0:
-            name = '{}{}'.format(name.encode('utf-8'), str(uuid.uuid1().int >> 5))[:18]
+            if name is None:
+                raise Exception('name not found')
 
-        profile, created = Profile.objects.get_or_create(user=request.user)
-        profile.name = name
-        profile.save()
+            if class_num is None:
+                raise Exception('class_num not found')
 
-        if created:
+            if first_name is None:
+                raise Exception('first_name not found')
+
+            if last_name is None:
+                raise Exception('last_name not found')
+
+            user_profile = Profile.objects.filter(name=name)
+
+            if user_profile.count() > 0:
+                name = '{}{}'.format(name.encode('utf-8'), str(uuid.uuid1().int >> 5))[:18]
+
+            profile = Profile.objects.get(user=request.user)
+            profile.name = name
+            profile.first_name = first_name
+            profile.last_name = last_name
+            profile.save()
+
             return Response({'id': 201, 'user_name': name}, status=status.HTTP_201_CREATED)
 
-        return Response({'id': 200, 'user_name': name}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({'id': 400, 'message': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
     @list_route(methods=['POST'])
     @mobile_verified()
@@ -129,6 +152,13 @@ class ProfileViewSet(DefaultsMixin, AuthMixin, mixins.RetrieveModelMixin,
         return Response({'id': 400, 'message': 'cant change name'}, status=status.HTTP_400_BAD_REQUEST)
 
     @list_route(methods=['POST'])
+    @mobile_verified()
+    def active_game(self, request):
+        name = request.data.get('name')
+        class_num = request.data.get('class_num')
+        class_num = request.data.get('class_num')
+
+    @list_route(methods=['POST'])
     def set_mobile_number(self, request):
         mobile_no = request.data.get('mobile_no')
 
@@ -136,7 +166,6 @@ class ProfileViewSet(DefaultsMixin, AuthMixin, mixins.RetrieveModelMixin,
             return Response({'id': 400, 'message': 'mobile number not found'}, status=status.HTTP_400_BAD_REQUEST)
 
         verification_code = random.randint(1000, 9999)
-        user_profile = None
 
         try:
             user_profile = Profile.objects.get(mobile_number=mobile_no)
@@ -148,8 +177,8 @@ class ProfileViewSet(DefaultsMixin, AuthMixin, mixins.RetrieveModelMixin,
         finally:
             user_profile.active = False
             user_profile.save()
-            kavenegar = Kavenegar(receptor=mobile_no, message=verification_code)
-            result = kavenegar.run()
+            inline = Inline(mobile_nu=mobile_no, message=verification_code)
+            result = inline.run()
 
             if result:
                 Verification.objects.create(
@@ -177,6 +206,56 @@ class ProfileViewSet(DefaultsMixin, AuthMixin, mixins.RetrieveModelMixin,
             state = status.HTTP_200_OK
 
         return Response({'id': response_id, 'message': message}, status=state)
+
+
+class ShopViewSet(DefaultsMixin, AuthMixin, mixins.RetrieveModelMixin,
+                     mixins.ListModelMixin, viewsets.GenericViewSet):
+    queryset = Shop.objects.all()
+    serializer_class = ShopSerializer
+
+    @list_route(methods=['POST'])
+    @mobile_verified()
+    def show(self, request):
+        store_id = request.data.get('store_id')
+        store = Store.objects.get(id=store_id)
+
+        shop_items = Shop.objects.filter(active=True, store=store)
+        serializer = self.serializer_class(shop_items, many=True)
+
+        return Response({'id': 200, 'message': serializer.data}, status=status.HTTP_200_OK)
+
+    @list_route(methods=['POST'])
+    @mobile_verified()
+    def buy(self, request):
+        try:
+            profile = Profile.objects.get(user=request.user)
+            shop = get_object_or_404(Shop, pk=request.data.get('shop_id'), enable=True)
+
+            purchase_store = FactoryStore.create(
+                shop=shop,
+                purchase_token=request.data.get('purchase_token'),
+                product_id=request.data.get('product_id'),
+                package_name=request.data.get('package_name')
+            )
+
+            is_verified, message = purchase_store.is_verified()
+
+            if not is_verified:
+                PurchaseLog.objects.create(user=profile, store_purchase_token=request.data.get('purchase_token'),
+                                           store_params=message, shop=shop)
+                return Response({'id': 404, 'message': 'not found'}, status=status.HTTP_404_NOT_FOUND)
+
+            PurchaseLog.objects.create(user=profile, store_purchase_token=request.data.get('purchase_token')
+                                       , store_params=message, used_token=True, shop=shop)
+
+            request.user.profile.gem += shop.quantity
+            request.user.profile.save()
+
+            return Response({'buy_gem': shop.quantity, 'user_gem': request.user.profile.gem},
+                            status=status.HTTP_202_ACCEPTED)
+
+        except Exception as e:
+            return Response({'id': 400, 'message': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
 
