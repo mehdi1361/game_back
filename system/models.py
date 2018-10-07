@@ -3,6 +3,7 @@ from base.models import Base
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth.models import User
 
+
 class QueuedManager(models.Manager):
     def get_queryset(self):
         return super(QueuedManager, self).get_queryset().filter(status='queued')

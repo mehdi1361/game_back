@@ -18,10 +18,10 @@ from rest_framework.exceptions import PermissionDenied
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
-from .serializers import UserSerializer, ProfileSerializer, ShopSerializer
+from .serializers import UserSerializer, ProfileSerializer, ShopSerializer, GameSerializer
 from common.utils import Inline
-from user_info.models import Device, Verification
-from system.models import Shop, Store, PurchaseLog
+from user_info.models import Device, Verification, GameUser
+from system.models import Shop, Store, PurchaseLog, Game
 
 
 def mobile_verified():
@@ -34,7 +34,9 @@ def mobile_verified():
                 return Response({'id': 400, 'message': 'mobile number not verified'},
                                 status=status.HTTP_400_BAD_REQUEST
                                 )
+
         return _decorator
+
     return decorator
 
 
@@ -46,7 +48,7 @@ class DefaultsMixin(object):
         filters.DjangoFilterBackend,
         filters.SearchFilter,
         filters.OrderingFilter,
-)
+    )
 
 
 class AuthMixin(object):
@@ -154,9 +156,44 @@ class ProfileViewSet(DefaultsMixin, AuthMixin, mixins.RetrieveModelMixin,
     @list_route(methods=['POST'])
     @mobile_verified()
     def active_game(self, request):
-        name = request.data.get('name')
-        class_num = request.data.get('class_num')
-        class_num = request.data.get('class_num')
+        try:
+            game_id = request.data.get('game_id')
+
+            if game_id is None:
+                raise Exception('game_id not found')
+
+            game = Game.objects.get(id=game_id)
+
+            if game.active_gem > request.user.profile.gem:
+                raise Exception('not enough gem')
+
+            game_serializer = GameSerializer(game)
+
+            game_user = GameUser.objects.get(profile=request.user.profile, game=game)
+
+            if game_user.active:
+                raise Exception("game already unlock!!!")
+
+            game_user.active = True
+            game_user.save()
+
+            request.user.profile.gem -= game.active_gem
+            request.user.profile.save()
+
+            return Response(
+                {'id': 200,
+                 'message':
+                     {
+                         "current_gem": request.user.profile.gem,
+                         "used_gem": game.active_gem,
+                         "game_unlock": game_serializer.data
+                     }
+                 },
+                status=status.HTTP_200_OK
+            )
+
+        except Exception as e:
+            return Response({'id': 400, 'message': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
     @list_route(methods=['POST'])
     def set_mobile_number(self, request):
@@ -207,9 +244,21 @@ class ProfileViewSet(DefaultsMixin, AuthMixin, mixins.RetrieveModelMixin,
 
         return Response({'id': response_id, 'message': message}, status=state)
 
+    @list_route(methods=['POST'])
+    @mobile_verified()
+    def player_info(self, request):
+        game_id = request.data.get('game_id')
+
+        if game_id is None:
+            raise Exception('game_id not found')
+
+        serializer = self.serializer_class(request.user.profile)
+        result = serializer.data
+        return Response({'id': 400, 'message': 'verification code send failed'}, status=status.HTTP_400_BAD_REQUEST)
+
 
 class ShopViewSet(DefaultsMixin, AuthMixin, mixins.RetrieveModelMixin,
-                     mixins.ListModelMixin, viewsets.GenericViewSet):
+                  mixins.ListModelMixin, viewsets.GenericViewSet):
     queryset = Shop.objects.all()
     serializer_class = ShopSerializer
 
@@ -256,6 +305,3 @@ class ShopViewSet(DefaultsMixin, AuthMixin, mixins.RetrieveModelMixin,
 
         except Exception as e:
             return Response({'id': 400, 'message': str(e)}, status=status.HTTP_400_BAD_REQUEST)
-
-
-
