@@ -123,6 +123,16 @@ class GameUser(Base):
         except Exception as e:
             return False, str(e)
 
+    @classmethod
+    def is_active(cls, game_id, user):
+        try:
+            game_user = cls.objects.get(game_id=game_id, profile=user.profile)
+
+            return game_user.active
+
+        except Exception as e:
+            return False, str(e)
+
 
 class UserCurrencyLog(Base):
     profile = models.ForeignKey(Profile, verbose_name=_('profile'), related_name='currency_logs')

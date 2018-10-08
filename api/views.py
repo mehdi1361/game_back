@@ -13,7 +13,6 @@ from rest_framework.response import Response
 
 from common.payment import FactoryStore
 from user_info.models import Profile
-from rest_framework.exceptions import PermissionDenied
 
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from rest_framework.authentication import TokenAuthentication
@@ -30,10 +29,34 @@ def mobile_verified():
             if Profile.is_active(self.request.user):
                 return drf_custom_method(self, *args, **kwargs)
             else:
-                # raise PermissionDenied()
-                return Response({'id': 400, 'message': 'mobile number not verified'},
+                return Response({'id': 400, 'message': 'game not activated'},
                                 status=status.HTTP_400_BAD_REQUEST
                                 )
+
+        return _decorator
+
+    return decorator
+
+
+def check_profile():
+    def decorator(drf_custom_method):
+        def _decorator(self, *args, **kwargs):
+
+            # if Profile.is_active(self.request.user):
+            if self.request.user.profile.name is None or \
+                    self.request.user.profile.first_name is None or self.request.user.profile.last_name is None:
+
+                return Response(
+                    {
+                        'id': 400,
+                        'message': 'profile not complete'
+                    },
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            else:
+                return drf_custom_method(self, *args, **kwargs)
+
+
 
         return _decorator
 
@@ -74,8 +97,8 @@ class UserViewSet(viewsets.ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         try:
-            device_id = request.data['deviceUniqueID']
-            device_name = request.data['deviceName']
+            device_id = request.data.get('deviceUniqueID')
+            device_name = request.data.get('deviceName')
 
             player_id = str(uuid.uuid1().int >> 32)
             user = User.objects.create_user(username=player_id, password=player_id)
@@ -245,16 +268,21 @@ class ProfileViewSet(DefaultsMixin, AuthMixin, mixins.RetrieveModelMixin,
         return Response({'id': response_id, 'message': message}, status=state)
 
     @list_route(methods=['POST'])
-    @mobile_verified()
+    @check_profile()
     def player_info(self, request):
         game_id = request.data.get('game_id')
 
         if game_id is None:
             raise Exception('game_id not found')
 
+        game = Game.objects.get(id=game_id)
+        game_serializer = GameSerializer(game)
+
         serializer = self.serializer_class(request.user.profile)
         result = serializer.data
-        return Response({'id': 400, 'message': 'verification code send failed'}, status=status.HTTP_400_BAD_REQUEST)
+        result['game'] = game_serializer.data
+
+        return Response({'id': 400, 'message': result}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class ShopViewSet(DefaultsMixin, AuthMixin, mixins.RetrieveModelMixin,
