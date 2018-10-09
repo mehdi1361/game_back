@@ -323,6 +323,9 @@ class ProfileViewSet(DefaultsMixin, AuthMixin, mixins.RetrieveModelMixin,
             if invitation_code_id is None:
                 raise Exception('inviter_code not found')
 
+            if request.user.profile.inviter_code == invitation_code_id:
+                raise Exception('cant use this invitation code')
+
             profile = Profile.objects.get(inviter_code=invitation_code_id)
 
             if request.user.profile.invitation_code is not None:
