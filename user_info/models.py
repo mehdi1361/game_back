@@ -150,7 +150,8 @@ class UserCurrencyLog(Base):
 
 
 class Message(Base):
-    profile = models.ForeignKey(Profile, verbose_name=_('profile'), related_name='currency_logs')
+    profile = models.ForeignKey(Profile, verbose_name=_('profile'), related_name='messages')
+    read = models.BooleanField(_('read message'), default=False)
     subject = models.CharField(_('subject'), max_length=200)
     body = models.TextField(_('body'))
 
@@ -161,6 +162,15 @@ class Message(Base):
 
     def __str__(self):
         return '{}-{}'.format(self.profile.name, self.subject)
+
+    @classmethod
+    def add(cls, profile, subject, body):
+        try:
+            cls.objects.create(profile=profile, subject=subject, body=body)
+            return True
+
+        except Exception as e:
+            return False
 
 
 def create_user_dependency(sender, instance, created, **kwargs):

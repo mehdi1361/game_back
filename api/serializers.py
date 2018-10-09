@@ -19,7 +19,7 @@ class UserSerializer(serializers.ModelSerializer):
 class ProfileSerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = get_user_model()
+        model = Profile
         fields = (
             'id',
             'name',
@@ -59,7 +59,6 @@ class GameUserSerializer(serializers.ModelSerializer):
         model = GameUser
 
         fields = (
-            'name',
             'score',
             'star',
             'level_1_reward',

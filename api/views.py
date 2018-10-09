@@ -19,8 +19,9 @@ from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from .serializers import UserSerializer, ProfileSerializer, ShopSerializer, GameSerializer, GameUserSerializer
 from common.utils import Inline
-from user_info.models import Device, Verification, GameUser
+from user_info.models import Device, Verification, GameUser, Message
 from system.models import Shop, Store, PurchaseLog, Game
+from django.conf import settings
 
 
 def mobile_verified():
@@ -55,8 +56,6 @@ def check_profile():
                 )
             else:
                 return drf_custom_method(self, *args, **kwargs)
-
-
 
         return _decorator
 
@@ -281,9 +280,15 @@ class ProfileViewSet(DefaultsMixin, AuthMixin, mixins.RetrieveModelMixin,
 
             serializer = self.serializer_class(request.user.profile)
             result = serializer.data
+
             result['game'] = game_serializer.data
 
-            return Response({'id': 400, 'message': result}, status=status.HTTP_400_BAD_REQUEST)
+            game_user = GameUser.objects.get(profile=request.user.profile, game=game)
+            game_user_serializer = GameUserSerializer(game_user)
+
+            result['game-data'] = game_user_serializer.data
+
+            return Response({'id': 200, 'message': result}, status=status.HTTP_200_OK)
 
         except Exception as e:
             return Response({'id': 400, 'message': str(e)}, status=status.HTTP_400_BAD_REQUEST)
@@ -307,21 +312,54 @@ class ProfileViewSet(DefaultsMixin, AuthMixin, mixins.RetrieveModelMixin,
 
     @list_route(methods=['POST'])
     @check_profile()
-    def set_inviter_code(self, request):
+    def set_invitation_code(self, request):
         try:
-            inviter_code_id = request.data.get('inviter_code')
+            invitation_code_id = request.data.get('invitation_code')
 
-            if inviter_code_id is None:
+            if invitation_code_id is None:
                 raise Exception('inviter_code not found')
 
-            inviter = GameUser.objects.get(profile__invitation_code=inviter_code_id)
+            inviter = GameUser.objects.get(profile__invitation_code=invitation_code_id)
 
-            request.user.profile.inviter_code = inviter.profile.invitation_code
+            if request.user.profile.inviter_code is not None:
+                raise Exception('inviter_code already exist')
+
+            request.user.profile.invitation_code = inviter.profile.inviter_code
+            request.user.profile.gem += settings.INVITE_REWARD
             request.user.profile.save()
 
+            inviter.profile.gem += settings.INVITE_REWARD
+            inviter.profile.save()
+
+            serializer = ProfileSerializer(request.user.profile)
+
+            Message.add(request.user.profile, 'invitation', 'invitation code accepted!!!')
+            Message.add(inviter.profile, 'inviter', 'inviter code accepted!!!')
+
+            return Response({'id': 200, 'message': serializer.data}, status=status.HTTP_200_OK)
 
         except Exception as e:
             return Response({'id': 400, 'message': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+    @list_route(methods=['POST'])
+    @check_profile()
+    def level(self, request):
+        try:
+            game_id = request.data.get('game_id')
+            level = request.data.get('level')
+
+            if game_id is None:
+                raise Exception('game_id not found')
+
+            if level is None:
+                raise Exception('level not found')
+
+            if level not in ['level_1_reward', 'level_2_reward', 'level_2_reward']:
+                raise Exception('reward not found')
+
+        except Exception as e:
+            return Response({'id': 400, 'message': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
 
 
 class ShopViewSet(DefaultsMixin, AuthMixin, mixins.RetrieveModelMixin,
