@@ -149,6 +149,7 @@ class ProfileViewSet(DefaultsMixin, AuthMixin, mixins.RetrieveModelMixin,
             profile.name = name
             profile.first_name = first_name
             profile.last_name = last_name
+            profile.class_num = class_num
             profile.save()
 
             return Response({'id': 201, 'user_name': name}, status=status.HTTP_201_CREATED)
@@ -284,7 +285,7 @@ class ProfileViewSet(DefaultsMixin, AuthMixin, mixins.RetrieveModelMixin,
 
             result['game'] = game_serializer.data
 
-            game_user = GameUser.objects.get(profile=request.user.profile, game=game)
+            game_user = GameUser.objects.get(profile=request.user.profile, game=game, active=True)
             game_user_serializer = GameUserSerializer(game_user)
 
             result['game-data'] = game_user_serializer.data
