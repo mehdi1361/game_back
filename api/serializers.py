@@ -2,7 +2,7 @@ from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
 from system.models import Shop, Game
-from user_info.models import Profile
+from user_info.models import Profile, GameUser
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -51,4 +51,18 @@ class GameSerializer(serializers.ModelSerializer):
             'level_1_complete_reward',
             'level_2_complete_reward',
             'level_3_complete_reward',
+        )
+
+
+class GameUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = GameUser
+
+        fields = (
+            'name',
+            'score',
+            'star',
+            'level_1_reward',
+            'level_2_reward',
+            'level_3_reward'
         )

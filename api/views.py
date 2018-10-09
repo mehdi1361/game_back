@@ -17,7 +17,7 @@ from user_info.models import Profile
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
-from .serializers import UserSerializer, ProfileSerializer, ShopSerializer, GameSerializer
+from .serializers import UserSerializer, ProfileSerializer, ShopSerializer, GameSerializer, GameUserSerializer
 from common.utils import Inline
 from user_info.models import Device, Verification, GameUser
 from system.models import Shop, Store, PurchaseLog, Game
@@ -270,19 +270,58 @@ class ProfileViewSet(DefaultsMixin, AuthMixin, mixins.RetrieveModelMixin,
     @list_route(methods=['POST'])
     @check_profile()
     def player_info(self, request):
-        game_id = request.data.get('game_id')
+        try:
+            game_id = request.data.get('game_id')
 
-        if game_id is None:
-            raise Exception('game_id not found')
+            if game_id is None:
+                raise Exception('game_id not found')
 
-        game = Game.objects.get(id=game_id)
-        game_serializer = GameSerializer(game)
+            game = Game.objects.get(id=game_id)
+            game_serializer = GameSerializer(game)
 
-        serializer = self.serializer_class(request.user.profile)
-        result = serializer.data
-        result['game'] = game_serializer.data
+            serializer = self.serializer_class(request.user.profile)
+            result = serializer.data
+            result['game'] = game_serializer.data
 
-        return Response({'id': 400, 'message': result}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'id': 400, 'message': result}, status=status.HTTP_400_BAD_REQUEST)
+
+        except Exception as e:
+            return Response({'id': 400, 'message': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+    @list_route(methods=['POST'])
+    @check_profile()
+    def leader_board(self, request):
+        try:
+            game_id = request.data.get('game_id')
+
+            if game_id is None:
+                raise Exception('game_id not found')
+
+            leader_board = GameUser.objects.filter(game_id=game_id, active=True).order_by('-score')
+            serializer = GameSerializer(leader_board, many=True)
+
+            return Response({'id': 200, 'message': serializer.data}, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            return Response({'id': 400, 'message': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+    @list_route(methods=['POST'])
+    @check_profile()
+    def set_inviter_code(self, request):
+        try:
+            inviter_code_id = request.data.get('inviter_code')
+
+            if inviter_code_id is None:
+                raise Exception('inviter_code not found')
+
+            inviter = GameUser.objects.get(profile__invitation_code=inviter_code_id)
+
+            request.user.profile.inviter_code = inviter.profile.invitation_code
+            request.user.profile.save()
+
+
+        except Exception as e:
+            return Response({'id': 400, 'message': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class ShopViewSet(DefaultsMixin, AuthMixin, mixins.RetrieveModelMixin,

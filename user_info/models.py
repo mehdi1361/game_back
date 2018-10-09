@@ -140,6 +140,28 @@ class UserCurrencyLog(Base):
     used_in = models.CharField(_('used in'), max_length=100, null=True, blank=True)
     description = models.TextField(_('description'), null=True, blank=True)
 
+    class Meta:
+        db_table = 'user_currency'
+        verbose_name = _('user_currency')
+        verbose_name_plural = _('user_currencies')
+
+    def __str__(self):
+        return '{}-{}'.format(self.profile.name, self.gem)
+
+
+class Message(Base):
+    profile = models.ForeignKey(Profile, verbose_name=_('profile'), related_name='currency_logs')
+    subject = models.CharField(_('subject'), max_length=200)
+    body = models.TextField(_('body'))
+
+    class Meta:
+        db_table = 'message'
+        verbose_name = _('message')
+        verbose_name_plural = _('messages')
+
+    def __str__(self):
+        return '{}-{}'.format(self.profile.name, self.subject)
+
 
 def create_user_dependency(sender, instance, created, **kwargs):
     if created:
