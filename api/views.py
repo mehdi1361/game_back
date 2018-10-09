@@ -304,13 +304,10 @@ class ProfileViewSet(DefaultsMixin, AuthMixin, mixins.RetrieveModelMixin,
             if game_id is None:
                 raise Exception('game_id not found')
 
-            leader_board = GameUser.objects.filter(game_id=game_id, active=True).order_by('-score')
-            serializer = GameUserSerializer(leader_board, many=True)
             result = []
 
-            for index, item in enumerate(serializer.data):
-                item['rank'] = index + 1
-                result.append(item)
+            for index, item in enumerate(GameUser.objects.filter(game_id=game_id, active=True).order_by('-score')):
+                result.append({"rank": index + 1, "score": item.score, "name": item.profile.name})
 
             return Response({'id': 200, 'message': result}, status=status.HTTP_200_OK)
 
