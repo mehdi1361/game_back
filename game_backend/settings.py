@@ -72,17 +72,23 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'game_backend.wsgi.application'
 
-
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'game_game',
-        'USER': 'postgres',
-        'PASSWORD': '13610522',
-        'HOST': 'localhost',
-        'PORT': '5432',
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }
 }
+
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql_psycopg2',
+#         'NAME': 'game_game',
+#         'USER': 'postgres',
+#         'PASSWORD': '13610522',
+#         'HOST': 'localhost',
+#         'PORT': '5432',
+#     }
+# }
 
 
 AUTH_PASSWORD_VALIDATORS = [

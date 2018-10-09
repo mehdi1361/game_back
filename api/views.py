@@ -30,7 +30,7 @@ def mobile_verified():
             if Profile.is_active(self.request.user):
                 return drf_custom_method(self, *args, **kwargs)
             else:
-                return Response({'id': 400, 'message': 'game not activated'},
+                return Response({'id': 400, 'message': 'mobile not verified'},
                                 status=status.HTTP_400_BAD_REQUEST
                                 )
 
@@ -267,6 +267,7 @@ class ProfileViewSet(DefaultsMixin, AuthMixin, mixins.RetrieveModelMixin,
         return Response({'id': response_id, 'message': message}, status=state)
 
     @list_route(methods=['POST'])
+    @mobile_verified()
     @check_profile()
     def player_info(self, request):
         try:
@@ -303,9 +304,14 @@ class ProfileViewSet(DefaultsMixin, AuthMixin, mixins.RetrieveModelMixin,
                 raise Exception('game_id not found')
 
             leader_board = GameUser.objects.filter(game_id=game_id, active=True).order_by('-score')
-            serializer = GameSerializer(leader_board, many=True)
+            serializer = GameUserSerializer(leader_board, many=True)
+            result = []
 
-            return Response({'id': 200, 'message': serializer.data}, status=status.HTTP_200_OK)
+            for index, item in enumerate(serializer.data):
+                item['rank'] = index + 1
+                result.append(item)
+
+            return Response({'id': 200, 'message': result}, status=status.HTTP_200_OK)
 
         except Exception as e:
             return Response({'id': 400, 'message': str(e)}, status=status.HTTP_400_BAD_REQUEST)
@@ -343,7 +349,7 @@ class ProfileViewSet(DefaultsMixin, AuthMixin, mixins.RetrieveModelMixin,
 
     @list_route(methods=['POST'])
     @check_profile()
-    def level(self, request):
+    def game_result(self, request):
         try:
             game_id = request.data.get('game_id')
             level = request.data.get('level')
@@ -359,7 +365,6 @@ class ProfileViewSet(DefaultsMixin, AuthMixin, mixins.RetrieveModelMixin,
 
         except Exception as e:
             return Response({'id': 400, 'message': str(e)}, status=status.HTTP_400_BAD_REQUEST)
-
 
 
 class ShopViewSet(DefaultsMixin, AuthMixin, mixins.RetrieveModelMixin,

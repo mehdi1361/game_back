@@ -10,6 +10,7 @@ class SmsSenderAdmin(admin.ModelAdmin):
 @admin.register(Game)
 class GameAdmin(admin.ModelAdmin):
     list_display = [
+        'id',
         'name',
         'active_gem',
         'level_1_complete_reward',
@@ -19,6 +20,7 @@ class GameAdmin(admin.ModelAdmin):
     ]
 
     list_editable = [
+        'name',
         'active_gem',
         'level_1_complete_reward',
         'level_2_complete_reward',
