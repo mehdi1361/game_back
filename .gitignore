@@ -10,3 +10,7 @@ static/
 /static/
 static/*
 /static/*
+
+db.sqlite3
+
+*.pyc

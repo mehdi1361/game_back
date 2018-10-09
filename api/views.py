@@ -325,22 +325,22 @@ class ProfileViewSet(DefaultsMixin, AuthMixin, mixins.RetrieveModelMixin,
             if invitation_code_id is None:
                 raise Exception('inviter_code not found')
 
-            inviter = GameUser.objects.get(profile__invitation_code=invitation_code_id)
+            profile = Profile.objects.get(inviter_code=invitation_code_id)
 
-            if request.user.profile.inviter_code is not None:
+            if request.user.profile.invitation_code is not None:
                 raise Exception('inviter_code already exist')
 
-            request.user.profile.invitation_code = inviter.profile.inviter_code
+            request.user.profile.invitation_code = profile.inviter_code
             request.user.profile.gem += settings.INVITE_REWARD
             request.user.profile.save()
 
-            inviter.profile.gem += settings.INVITE_REWARD
-            inviter.profile.save()
+            profile.gem += settings.INVITE_REWARD
+            profile.save()
 
             serializer = ProfileSerializer(request.user.profile)
 
             Message.add(request.user.profile, 'invitation', 'invitation code accepted!!!')
-            Message.add(inviter.profile, 'inviter', 'inviter code accepted!!!')
+            Message.add(profile, 'inviter', 'inviter code accepted!!!')
 
             return Response({'id': 200, 'message': serializer.data}, status=status.HTTP_200_OK)
 
@@ -353,6 +353,21 @@ class ProfileViewSet(DefaultsMixin, AuthMixin, mixins.RetrieveModelMixin,
         try:
             game_id = request.data.get('game_id')
             level = request.data.get('level')
+            reward = request.data.get('reward')
+            gem = request.data.get('gem')
+            score = request.data.get('score')
+
+            if 100 < score < 200:
+                star =1
+
+            elif 200 < score < 300:
+                star = 2
+
+            elif 300 < score <400:
+                star = 3
+
+            else:
+                star = 0
 
             if game_id is None:
                 raise Exception('game_id not found')
@@ -360,9 +375,51 @@ class ProfileViewSet(DefaultsMixin, AuthMixin, mixins.RetrieveModelMixin,
             if level is None:
                 raise Exception('level not found')
 
-            if level not in ['level_1_reward', 'level_2_reward', 'level_2_reward']:
-                raise Exception('reward not found')
+            game = Game.objects.get(id=game_id)
 
+            game_user = GameUser.objects.get(profile=request.user.profile, game=game)
+
+            if level == 1 and reward == 1:
+                if not game_user.level_1_reward:
+                    request.user.profile.gem += game.level_1_complete_reward
+                    request.user.profile.save()
+                    game_user.level_1_reward =True
+
+            if level == 2 and reward == 1:
+                if not game_user.level_2_reward:
+                    request.user.profile.gem += game.level_2_complete_reward
+                    request.user.profile.save()
+                    game_user.level_2_reward = True
+
+            if level == 3 and reward == 1:
+                if not game_user.level_3_reward:
+                    request.user.profile.gem += game.level_3_complete_reward
+                    request.user.profile.save()
+                    game_user.level_3_reward = True
+
+            if level > 3:
+                request.user.profile.gem += gem
+                request.user.profile.save()
+
+            game_user.score = score
+            game_user.star = star
+            game_user.save()
+
+            serializer = GameUserSerializer(game_user)
+            return Response({'id': 200, 'message': serializer.data}, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            return Response({'id': 400, 'message': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+    @list_route(methods=['POST'])
+    @check_profile()
+    def game_info(self, request):
+        try:
+            game_id = request.data.get('game_id')
+            game = Game.objects.get(id=game_id)
+
+            serializer = GameSerializer(game)
+            return Response({'id': 200, 'message': serializer.data}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({'id': 400, 'message': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
