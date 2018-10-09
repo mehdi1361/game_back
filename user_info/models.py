@@ -184,7 +184,8 @@ def create_user_dependency(sender, instance, created, **kwargs):
 def create_game_user(sender, instance, created, **kwargs):
     if created:
         for user in User.objects.all():
-            GameUser.objects.create(profile=user.profile, game=instance)
+            if user.profile is not None:
+                GameUser.objects.create(profile=user.profile, game=instance)
 
 
 signals.post_save.connect(create_user_dependency, sender=User)
