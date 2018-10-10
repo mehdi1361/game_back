@@ -192,7 +192,11 @@ class ProfileViewSet(DefaultsMixin, AuthMixin, mixins.RetrieveModelMixin,
 
             game_serializer = GameSerializer(game)
 
-            game_user = GameUser.objects.get(profile=request.user.profile, game=game)
+            try:
+                game_user = GameUser.objects.get(profile=request.user.profile, game=game)
+
+            except Exception as p:
+                game_user = GameUser.objects.create(profile=request.user.profile, game=game)
 
             if game_user.active:
                 raise Exception("game already unlock!!!")
@@ -359,12 +363,12 @@ class ProfileViewSet(DefaultsMixin, AuthMixin, mixins.RetrieveModelMixin,
             score = request.data.get('score')
 
             if 100 < score < 200:
-                star =1
+                star = 1
 
             elif 200 < score < 300:
                 star = 2
 
-            elif 300 < score <400:
+            elif 300 < score < 400:
                 star = 3
 
             else:
@@ -384,7 +388,7 @@ class ProfileViewSet(DefaultsMixin, AuthMixin, mixins.RetrieveModelMixin,
                 if not game_user.level_1_reward:
                     request.user.profile.gem += game.level_1_complete_reward
                     request.user.profile.save()
-                    game_user.level_1_reward =True
+                    game_user.level_1_reward = True
 
             if level == 2 and reward == 1:
                 if not game_user.level_2_reward:
