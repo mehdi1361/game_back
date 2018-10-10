@@ -256,20 +256,32 @@ class ProfileViewSet(DefaultsMixin, AuthMixin, mixins.RetrieveModelMixin,
 
     @list_route(methods=['POST'])
     def verified(self, request):
-        response_id = 400
-        state = status.HTTP_400_BAD_REQUEST
+        try:
+            response_id = 400
+            state = status.HTTP_400_BAD_REQUEST
 
-        verification_code = request.data.get('verification_code')
-        verified, message = Verification.is_verified(user=request.user, verification_code=verification_code)
+            verification_code = request.data.get('verification_code')
+            mobile_no = request.data.get('mobile_no')
 
-        if verified:
-            profile = Profile.objects.get(user=request.user)
-            profile.active = True
-            profile.save()
-            response_id = 200
-            state = status.HTTP_200_OK
+            if mobile_no is None:
+                raise Exception('mobile no not found')
 
-        return Response({'id': response_id, 'message': message}, status=state)
+            verified, message, player_id = Verification.is_verified(
+                mobile_no=mobile_no,
+                verification_code=verification_code
+            )
+
+            if verified:
+                profile = Profile.objects.get(user=request.user)
+                profile.active = True
+                profile.save()
+                response_id = 200
+                state = status.HTTP_200_OK
+
+            return Response({'id': response_id, 'message': message, "player_id": player_id}, status=state)
+
+        except Exception as e:
+            return Response({'id': 400, 'message': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
     @list_route(methods=['POST'])
     @mobile_verified()

@@ -73,20 +73,22 @@ class Verification(Base):
         return '{}-{}'.format(self.profile.mobile_number, self.verification_code)
 
     @classmethod
-    def is_verified(cls, user, verification_code):
+    def is_verified(cls, mobile_no, verification_code):
         try:
-            profile = Profile.objects.get(user=user)
-            verification = cls.objects.get(verification_code=verification_code, profile=profile)
+            verification = cls.objects.get(
+                verification_code=verification_code,
+                profile__mobile_number=mobile_no
+            )
 
             delta = datetime.now(tz=pytz.utc) - verification.created_date
             minute, seconds = divmod(delta.days * 86400 + delta.seconds, 60)
             if minute <= 1 and seconds < 60:
-                return True, 'verification code accepted'
+                return True, 'verification code accepted', verification.profile.user.username
 
-            return False, 'verification code not accepted'
+            return False, 'verification code not accepted', None
 
         except:
-            return False, 'profile or verification code not found'
+            return False, 'profile or verification code not found', None
 
 
 class GameUser(Base):
