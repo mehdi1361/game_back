@@ -304,7 +304,7 @@ class ProfileViewSet(DefaultsMixin, AuthMixin, mixins.RetrieveModelMixin,
             game_user = GameUser.objects.get(profile=request.user.profile, game=game, active=True)
             game_user_serializer = GameUserSerializer(game_user)
 
-            result['game-data'] = game_user_serializer.data
+            result['game_data'] = game_user_serializer.data
 
             return Response({'id': 200, 'message': result}, status=status.HTTP_200_OK)
 
