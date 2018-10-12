@@ -272,7 +272,7 @@ class ProfileViewSet(DefaultsMixin, AuthMixin, mixins.RetrieveModelMixin,
             )
 
             if verified:
-                profile = Profile.objects.get(user=request.user)
+                profile = Profile.objects.get(user__username=player_id)
                 profile.active = True
                 profile.save()
                 response_id = 200
