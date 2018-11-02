@@ -11,21 +11,21 @@ import pytz
 
 
 class Profile(Base):
-    name = models.CharField(_('name'), max_length=200, null=True, blank=True)
-    first_name = models.CharField(_('first name'), max_length=200, null=True, blank=True)
-    last_name = models.CharField(_('last name'), max_length=200, null=True, blank=True)
-    class_num = models.IntegerField(_('class'), null=True, blank=True)
-    inviter_code = models.CharField(_('inviter code'), max_length=200, null=True, blank=True)
-    gem = models.IntegerField(_('gem'), default=0, blank=True)
-    mobile_number = models.CharField(_('mobile number'), max_length=15, null=True, blank=True, unique=True)
-    active = models.BooleanField(_('active'), default=False)
-    user = models.OneToOneField(User, verbose_name=_('profile'))
-    invitation_code = models.CharField(_('invitation code'), max_length=20, null=True, blank=True, unique=True)
+    name = models.CharField(_('نام'), max_length=200, null=True, blank=True)
+    first_name = models.CharField(_('نام'), max_length=200, null=True, blank=True)
+    last_name = models.CharField(_('نام خانوادگی'), max_length=200, null=True, blank=True)
+    class_num = models.IntegerField(_('کلاس'), null=True, blank=True)
+    inviter_code = models.CharField(_('کد دعوت'), max_length=200, null=True, blank=True)
+    gem = models.IntegerField(_('الماس'), default=0, blank=True)
+    mobile_number = models.CharField(_('شماره موبایل'), max_length=15, null=True, blank=True, unique=True)
+    active = models.BooleanField(_('فعال'), default=False)
+    user = models.OneToOneField(User, verbose_name=_('کاربر'))
+    invitation_code = models.CharField(_('کد دعوت کننده'), max_length=20, null=True, blank=True, unique=True)
 
     class Meta:
         db_table = 'profiles'
-        verbose_name = _('profile')
-        verbose_name_plural = _('profiles')
+        verbose_name = _('پروفایل')
+        verbose_name_plural = _('پروفایل ها')
 
     def __str__(self):
         return '{}-{}'.format(self.name, self.user.username)
@@ -46,14 +46,14 @@ class Profile(Base):
 
 
 class Device(Base):
-    device_name = models.CharField(_('device name'), max_length=200, blank=True)
-    device_id = models.CharField(_('device id'), max_length=200, blank=True)
-    user = models.ForeignKey(User, verbose_name=_('profile'), related_name='devices', null=True, blank=True)
+    device_name = models.CharField(_('نام دستگاه'), max_length=200, blank=True)
+    device_id = models.CharField(_('کد دستگاه'), max_length=200, blank=True)
+    user = models.ForeignKey(User, verbose_name=_('کاربر'), related_name='devices', null=True, blank=True)
 
     class Meta:
         db_table = 'devices'
-        verbose_name = _('device')
-        verbose_name_plural = _('devices')
+        verbose_name = _('دستگاه')
+        verbose_name_plural = _('دستگاه ها')
         unique_together = ('user', 'device_id')
 
     def __str__(self):
@@ -61,13 +61,13 @@ class Device(Base):
 
 
 class Verification(Base):
-    verification_code = models.CharField(_('verification code'), max_length=8, blank=True)
-    profile = models.ForeignKey(Profile, verbose_name=_('profile'), related_name='devices')
+    verification_code = models.CharField(_('کد تایید'), max_length=8, blank=True)
+    profile = models.ForeignKey(Profile, verbose_name=_('پروفایل'), related_name='devices')
 
     class Meta:
         db_table = 'verification'
-        verbose_name = _('verification')
-        verbose_name_plural = _('verification')
+        verbose_name = _('کد تایید')
+        verbose_name_plural = _('کد تایید ها')
 
     def __str__(self):
         return '{}-{}'.format(self.profile.mobile_number, self.verification_code)
@@ -92,20 +92,20 @@ class Verification(Base):
 
 
 class GameUser(Base):
-    profile = models.ForeignKey(Profile, verbose_name=_('profile'), related_name='games', null=True)
-    game = models.ForeignKey(Game, verbose_name=_('profile'), related_name='users', null=True)
-    score = models.PositiveIntegerField(_('score'), default=0)
-    star = models.PositiveIntegerField(_('star'), default=0)
-    active = models.BooleanField(_('active'), default=False)
-    invite_code = models.CharField(_('invite code'), max_length=20, null=True, blank=True)
-    level_1_reward = models.BooleanField(_('level 1 reward'), default=False)
-    level_2_reward = models.BooleanField(_('level 2 reward'), default=False)
-    level_3_reward = models.BooleanField(_('level 3 reward'), default=False)
+    profile = models.ForeignKey(Profile, verbose_name=_('کاربر'), related_name='games', null=True)
+    game = models.ForeignKey(Game, verbose_name=_('بازی'), related_name='users', null=True)
+    score = models.PositiveIntegerField(_('امتیاز'), default=0)
+    star = models.PositiveIntegerField(_('ستاره'), default=0)
+    active = models.BooleanField(_('فعال'), default=False)
+    invite_code = models.CharField(_('کد دعوت'), max_length=20, null=True, blank=True)
+    level_1_reward = models.BooleanField(_('جایزه مرحله اول'), default=False)
+    level_2_reward = models.BooleanField(_('جایزه مرحله دوم'), default=False)
+    level_3_reward = models.BooleanField(_('جایزه مرحله سوم'), default=False)
 
     class Meta:
         db_table = 'game_user'
-        verbose_name = _('game_user')
-        verbose_name_plural = _('game_users')
+        verbose_name = _('بازی کاربر')
+        verbose_name_plural = _('بازی کاربران')
 
     def __str__(self):
         return '{}-{}'.format(self.profile.name, self.game.name)
@@ -137,25 +137,25 @@ class GameUser(Base):
 
 
 class UserCurrencyLog(Base):
-    profile = models.ForeignKey(Profile, verbose_name=_('profile'), related_name='currency_logs')
-    gem = models.PositiveIntegerField(_('gem'), default=0, null=True, blank=True)
-    used_in = models.CharField(_('used in'), max_length=100, null=True, blank=True)
-    description = models.TextField(_('description'), null=True, blank=True)
+    profile = models.ForeignKey(Profile, verbose_name=_('کاربر'), related_name='currency_logs')
+    gem = models.PositiveIntegerField(_('الماس'), default=0, null=True, blank=True)
+    used_in = models.CharField(_('استفاده شده در'), max_length=100, null=True, blank=True)
+    description = models.TextField(_('توضیحات'), null=True, blank=True)
 
     class Meta:
         db_table = 'user_currency'
-        verbose_name = _('user_currency')
-        verbose_name_plural = _('user_currencies')
+        verbose_name = _('اطلاعات کاربر')
+        verbose_name_plural = _('اطلاعات کاربران')
 
     def __str__(self):
         return '{}-{}'.format(self.profile.name, self.gem)
 
 
 class Message(Base):
-    profile = models.ForeignKey(Profile, verbose_name=_('profile'), related_name='messages')
-    read = models.BooleanField(_('read message'), default=False)
-    subject = models.CharField(_('subject'), max_length=200)
-    body = models.TextField(_('body'))
+    profile = models.ForeignKey(Profile, verbose_name=_('کاربر'), related_name='messages')
+    read = models.BooleanField(_('خوانده'), default=False)
+    subject = models.CharField(_('موضوع'), max_length=200)
+    body = models.TextField(_('شرح'))
 
     class Meta:
         db_table = 'message'
