@@ -64,5 +64,6 @@ class GameUserSerializer(serializers.ModelSerializer):
             'star',
             'level_1_reward',
             'level_2_reward',
-            'level_3_reward'
+            'level_3_reward',
+            'active'
         )
