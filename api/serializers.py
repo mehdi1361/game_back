@@ -28,7 +28,8 @@ class ProfileSerializer(serializers.ModelSerializer):
             'mobile_number',
             'active',
             'inviter_code',
-            'invitation_code'
+            'invitation_code',
+            'year'
         )
 
 

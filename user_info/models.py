@@ -11,6 +11,23 @@ import pytz
 
 
 class Profile(Base):
+    YEAR_STATUS = (
+        ('1397', '1397'),
+        ('1398', '1398'),
+        ('1399', '1399'),
+        ('1400', '1400'),
+        ('1401', '1401'),
+        ('1402', '1402'),
+        ('1403', '1403'),
+        ('1404', '1404'),
+        ('1405', '1405'),
+        ('1405', '1405'),
+        ('1406', '1406'),
+        ('1407', '1407'),
+        ('1408', '1408'),
+        ('1409', '1409'),
+        ('1410', '1410'),
+    )
     name = models.CharField(_('نام'), max_length=200, null=True, blank=True)
     first_name = models.CharField(_('نام'), max_length=200, null=True, blank=True)
     last_name = models.CharField(_('نام خانوادگی'), max_length=200, null=True, blank=True)
@@ -21,6 +38,7 @@ class Profile(Base):
     active = models.BooleanField(_('فعال'), default=False)
     user = models.OneToOneField(User, verbose_name=_('کاربر'))
     invitation_code = models.CharField(_('کد دعوت کننده'), max_length=20, null=True, blank=True, unique=True)
+    year = models.CharField(_('سال تحصیلی'), max_length=5, default='1397', choices=YEAR_STATUS)
 
     class Meta:
         db_table = 'profiles'

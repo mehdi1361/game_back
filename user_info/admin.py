@@ -14,7 +14,8 @@ class ProfileAdmin(admin.ModelAdmin):
         'mobile_number',
         'active',
         'user',
-        'invitation_code'
+        'invitation_code',
+        'year'
     ]
 
 
