@@ -301,7 +301,7 @@ class ProfileViewSet(DefaultsMixin, AuthMixin, mixins.RetrieveModelMixin,
 
             result['game'] = game_serializer.data
 
-            game_user = GameUser.objects.get(profile=request.user.profile, game=game, active=True)
+            game_user = GameUser.objects.get(profile=request.user.profile, game=game)
             game_user_serializer = GameUserSerializer(game_user)
 
             result['game_data'] = game_user_serializer.data
@@ -322,7 +322,7 @@ class ProfileViewSet(DefaultsMixin, AuthMixin, mixins.RetrieveModelMixin,
 
             result = []
 
-            for index, item in enumerate(GameUser.objects.filter(game_id=game_id, active=True).order_by('-score')):
+            for index, item in enumerate(GameUser.objects.filter(game_id=game_id).order_by('-score')):
                 result.append({"rank": index + 1, "score": item.score, "name": item.profile.name})
 
             return Response({'id': 200, 'message': result}, status=status.HTTP_200_OK)
