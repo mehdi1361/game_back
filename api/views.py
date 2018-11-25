@@ -322,7 +322,7 @@ class ProfileViewSet(DefaultsMixin, AuthMixin, mixins.RetrieveModelMixin,
 
             result = []
 
-            for index, item in enumerate(GameUser.objects.filter(game_id=game_id).order_by('-score')):
+            for index, item in enumerate(GameUser.objects.filter(game__game_id=game_id).order_by('-score')):
                 result.append({"rank": index + 1, "score": item.score, "name": item.profile.name})
 
             return Response({'id': 200, 'message': result}, status=status.HTTP_200_OK)
