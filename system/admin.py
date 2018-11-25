@@ -15,8 +15,7 @@ class GameAdmin(admin.ModelAdmin):
         'active_gem',
         'level_1_complete_reward',
         'level_2_complete_reward',
-        'level_3_complete_reward',
-        'game_active_price'
+        'level_3_complete_reward'
     ]
 
     list_editable = [
@@ -24,8 +23,7 @@ class GameAdmin(admin.ModelAdmin):
         'active_gem',
         'level_1_complete_reward',
         'level_2_complete_reward',
-        'level_3_complete_reward',
-        'game_active_price'
+        'level_3_complete_reward'
     ]
 
 

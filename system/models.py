@@ -36,7 +36,6 @@ class Game(Base):
     level_1_complete_reward = models.PositiveIntegerField(_('جایزه مرحله اول'), default=10)
     level_2_complete_reward = models.PositiveIntegerField(_('جایزه مرحله دوم'), default=20)
     level_3_complete_reward = models.PositiveIntegerField(_('جایزه مرحله  سوم'), default=30)
-    game_active_price = models.PositiveIntegerField(_('تعداد الماس برای فعالسازی'), default=30)
 
     class Meta:
         db_table = 'game'

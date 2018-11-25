@@ -51,7 +51,7 @@ class GameSerializer(serializers.ModelSerializer):
             'level_1_complete_reward',
             'level_2_complete_reward',
             'level_3_complete_reward',
-            'game_active_price'
+            'active_gem'
         )
 
 
