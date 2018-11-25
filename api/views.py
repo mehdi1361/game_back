@@ -185,7 +185,7 @@ class ProfileViewSet(DefaultsMixin, AuthMixin, mixins.RetrieveModelMixin,
             if game_id is None:
                 raise Exception('game_id not found')
 
-            game = Game.objects.get(id=game_id)
+            game = Game.objects.get(game_id=game_id)
 
             if game.active_gem > request.user.profile.gem:
                 raise Exception('not enough gem')
@@ -293,7 +293,7 @@ class ProfileViewSet(DefaultsMixin, AuthMixin, mixins.RetrieveModelMixin,
             if game_id is None:
                 raise Exception('game_id not found')
 
-            game = Game.objects.get(id=game_id)
+            game = Game.objects.get(game_id=game_id)
             game_serializer = GameSerializer(game)
 
             serializer = self.serializer_class(request.user.profile)
@@ -392,7 +392,7 @@ class ProfileViewSet(DefaultsMixin, AuthMixin, mixins.RetrieveModelMixin,
             if level is None:
                 raise Exception('level not found')
 
-            game = Game.objects.get(id=game_id)
+            game = Game.objects.get(game_id=game_id)
 
             game_user = GameUser.objects.get(profile=request.user.profile, game=game)
 
@@ -433,7 +433,7 @@ class ProfileViewSet(DefaultsMixin, AuthMixin, mixins.RetrieveModelMixin,
     def game_info(self, request):
         try:
             game_id = request.data.get('game_id')
-            game = Game.objects.get(id=game_id)
+            game = Game.objects.get(game_id=game_id)
 
             serializer = GameSerializer(game)
             return Response({'id': 200, 'message': serializer.data}, status=status.HTTP_200_OK)
@@ -450,7 +450,7 @@ class ShopViewSet(DefaultsMixin, AuthMixin, mixins.RetrieveModelMixin,
     @mobile_verified()
     def show(self, request):
         store_id = request.data.get('store_id')
-        store = Store.objects.get(id=store_id)
+        store = Store.objects.get(store_id=store_id)
 
         shop_items = Shop.objects.filter(active=True, store=store)
         serializer = self.serializer_class(shop_items, many=True)

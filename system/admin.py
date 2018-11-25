@@ -15,7 +15,8 @@ class GameAdmin(admin.ModelAdmin):
         'active_gem',
         'level_1_complete_reward',
         'level_2_complete_reward',
-        'level_3_complete_reward'
+        'level_3_complete_reward',
+        'game_id'
     ]
 
     list_editable = [
@@ -23,7 +24,8 @@ class GameAdmin(admin.ModelAdmin):
         'active_gem',
         'level_1_complete_reward',
         'level_2_complete_reward',
-        'level_3_complete_reward'
+        'level_3_complete_reward',
+        'game_id'
     ]
 
 
@@ -33,8 +35,8 @@ class ShopInline(admin.StackedInline):
 
 @admin.register(Store)
 class StoreAdmin(admin.ModelAdmin):
-    list_display = ['name', 'valid_name', 'access_token', 'refresh_token']
-    list_editable = ['valid_name', 'access_token', 'refresh_token']
+    list_display = ['id', 'name', 'valid_name', 'access_token', 'refresh_token', 'store_id']
+    list_editable = ['name', 'valid_name', 'access_token', 'refresh_token', 'store_id']
     inlines = [ShopInline, ]
 
 

@@ -36,6 +36,7 @@ class Game(Base):
     level_1_complete_reward = models.PositiveIntegerField(_('جایزه مرحله اول'), default=10)
     level_2_complete_reward = models.PositiveIntegerField(_('جایزه مرحله دوم'), default=20)
     level_3_complete_reward = models.PositiveIntegerField(_('جایزه مرحله  سوم'), default=30)
+    game_id = models.PositiveIntegerField(_('کد یکتای بازی'), null=True, blank=True, unique=True)
 
     class Meta:
         db_table = 'game'
@@ -51,6 +52,7 @@ class Store(Base):
     valid_name = models.CharField(_('نام اصلی'), max_length=50, null=True, blank=True)
     access_token = models.CharField(_('توکن دسترسی'), max_length=50, null=True, blank=True)
     refresh_token = models.CharField(_('توکن نوسازی'), max_length=50, null=True, blank=True)
+    store_id = models.PositiveIntegerField(_('کد یکتای فروشگاه'), null=True, blank=True, unique=True)
 
     class Meta:
         verbose_name = _('فروشگاه')
