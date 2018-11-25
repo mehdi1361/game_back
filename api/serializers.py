@@ -26,7 +26,9 @@ class ProfileSerializer(serializers.ModelSerializer):
             'class_num',
             'gem',
             'mobile_number',
-            'active'
+            'active',
+            'inviter_code',
+            'invitation_code'
         )
 
 
