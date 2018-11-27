@@ -68,6 +68,7 @@ class Shop(Base):
     quantity = models.PositiveIntegerField(_('تعداد'), default=10)
     price = models.PositiveIntegerField(_('قیمت'), default=10)
     active = models.BooleanField(_('فعال'), default=False)
+    shop_id = models.PositiveIntegerField(_('کد یکتای پکیج'), null=True, blank=True, unique=True)
     store = models.ForeignKey(Store, verbose_name=_('فروشگاه'), null=True)
 
     class Meta:
