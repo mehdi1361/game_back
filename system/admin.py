@@ -42,5 +42,5 @@ class StoreAdmin(admin.ModelAdmin):
 
 @admin.register(Shop)
 class ShopAdmin(admin.ModelAdmin):
-    list_display = ['name', 'quantity', 'active', 'store']
-    list_editable = ['quantity', 'active', 'store']
+    list_display = ['name', 'quantity', 'active', 'store', 'shop_id']
+    list_editable = ['quantity', 'active', 'store', 'shop_id']
