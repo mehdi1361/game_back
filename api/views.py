@@ -127,6 +127,7 @@ class ProfileViewSet(DefaultsMixin, AuthMixin, mixins.RetrieveModelMixin,
             class_num = request.data.get('class_num')
             first_name = request.data.get('first_name')
             last_name = request.data.get('last_name')
+            year = request.data.get('year')
 
             if name is None:
                 raise Exception('name not found')
@@ -139,6 +140,9 @@ class ProfileViewSet(DefaultsMixin, AuthMixin, mixins.RetrieveModelMixin,
 
             if last_name is None:
                 raise Exception('last_name not found')
+
+            if year is None:
+                raise Exception('year not found')
 
             user_profile = Profile.objects.filter(name=name)
 
