@@ -85,6 +85,7 @@ class PurchaseLog(Base):
     store_purchase_token = models.CharField(_('store purchase token'), max_length=100)
     store_params = models.CharField(_('store params'), max_length=100)
     shop = models.ForeignKey(Shop, verbose_name=_('shop'), related_name='users')
+    used_token = models.BooleanField(_('used_token'), default=False)
 
     class Meta:
         db_table = 'purchase_log'

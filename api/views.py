@@ -461,8 +461,7 @@ class ShopViewSet(DefaultsMixin, AuthMixin, mixins.RetrieveModelMixin,
     @mobile_verified()
     def buy(self, request):
         try:
-            profile = Profile.objects.get(user=request.user)
-            shop = get_object_or_404(Shop, pk=request.data.get('shop_id'), enable=True)
+            shop = get_object_or_404(Shop, shop_id=request.data.get('shop_id'), active=True)
 
             purchase_store = FactoryStore.create(
                 shop=shop,
@@ -473,12 +472,15 @@ class ShopViewSet(DefaultsMixin, AuthMixin, mixins.RetrieveModelMixin,
 
             is_verified, message = purchase_store.is_verified()
 
-            if not is_verified:
-                PurchaseLog.objects.create(user=profile, store_purchase_token=request.data.get('purchase_token'),
-                                           store_params=message, shop=shop)
-                return Response({'id': 404, 'message': 'not found'}, status=status.HTTP_404_NOT_FOUND)
+            is_verified = True
+            message = "test"
 
-            PurchaseLog.objects.create(user=profile, store_purchase_token=request.data.get('purchase_token')
+            if not is_verified:
+                PurchaseLog.objects.create(user=request.user, store_purchase_token=request.data.get('purchase_token'),
+                                           store_params=message, shop=shop)
+                return Response({'id': 404, 'message': 'store cant find purchase token'}, status=status.HTTP_404_NOT_FOUND)
+
+            PurchaseLog.objects.create(user=request.user, store_purchase_token=request.data.get('purchase_token')
                                        , store_params=message, used_token=True, shop=shop)
 
             request.user.profile.gem += shop.quantity

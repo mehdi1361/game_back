@@ -6,7 +6,7 @@ from system.models import Store
 class FactoryStore(object):
     @classmethod
     def create(cls, shop, purchase_token, product_id, package_name):
-        if shop.store.valid_name == 'cafe_bazar':
+        if shop.store.valid_name == 'cafebazar':
             return CafeBazar(purchase_token, product_id, package_name)
 
         if shop.store.valid_name == 'myket':
@@ -18,7 +18,7 @@ class CafeBazar(object):
         self.purchase_token = purchase_token
         self.product_id = product_id
         self.package_name = package_name
-        self.store = Store.objects.get(valid_name='cafe_bazar')
+        self.store = Store.objects.get(valid_name='cafebazar')
         self.url = "https://pardakht.cafebazaar.ir/devapi/v2/api/validate/{}/inapp/{}/purchases/{}"\
             .format(self.package_name, self.product_id, self.purchase_token)
 
