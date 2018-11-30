@@ -309,6 +309,8 @@ class ProfileViewSet(DefaultsMixin, AuthMixin, mixins.RetrieveModelMixin,
             game_user_serializer = GameUserSerializer(game_user)
 
             result['game_data'] = game_user_serializer.data
+            result['first_name'] = game_user.profile.first_name
+            result['last_name'] = game_user.profile.last_name
             result['invite_code_reward'] = settings.INVITE_REWARD
 
             return Response({'id': 200, 'message': result}, status=status.HTTP_200_OK)
