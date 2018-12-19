@@ -36,7 +36,7 @@ class Profile(Base):
     gem = models.IntegerField(_('الماس'), default=0, blank=True)
     mobile_number = models.CharField(_('شماره موبایل'), max_length=15, null=True, blank=True, unique=True)
     active = models.BooleanField(_('فعال'), default=False)
-    user = models.OneToOneField(User, verbose_name=_('کاربر'))
+    user = models.OneToOneField(User, verbose_name=_('کاربر'), on_delete=models.CASCADE)
     invitation_code = models.CharField(_('کد دعوت کننده'), max_length=20, null=True, blank=True, unique=True)
     year = models.CharField(_('سال تحصیلی'), max_length=5, default='1397', choices=YEAR_STATUS)
 
@@ -212,5 +212,15 @@ def create_game_user(sender, instance, created, **kwargs):
                 pass
 
 
+def delete_profile_user(sender, instance, **kwargs):
+    try:
+        user = User.objects.get(pk=instance.user.id)
+        user.delete()
+
+    except:
+        pass
+
+
 signals.post_save.connect(create_user_dependency, sender=User)
 signals.post_save.connect(create_game_user, sender=Game)
+signals.post_delete.connect(delete_profile_user, sender=Profile)

@@ -176,3 +176,6 @@ JET_THEMES = [
         'title': 'Light Gray'
     }
 ]
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')

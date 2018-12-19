@@ -37,6 +37,7 @@ class Game(Base):
     level_2_complete_reward = models.PositiveIntegerField(_('جایزه مرحله دوم'), default=20)
     level_3_complete_reward = models.PositiveIntegerField(_('جایزه مرحله  سوم'), default=30)
     game_id = models.PositiveIntegerField(_('کد یکتای بازی'), null=True, blank=True, unique=True)
+    bundle_version = models.PositiveIntegerField(_('bundle version'), default=0)
 
     class Meta:
         db_table = 'game'
@@ -94,3 +95,15 @@ class PurchaseLog(Base):
 
     def __str__(self):
         return '{}'.format(self.store_purchase_token)
+
+
+class ConfigFile(Base):
+    file_config = models.FileField(_('file config'), upload_to='config', null=True)
+
+    class Meta:
+        db_table = 'config_file'
+        verbose_name = _('فایل کانفیگ')
+        verbose_name_plural = _('فایل کانفیگ')
+
+    def __str__(self):
+        return '{}'.format(self.id)

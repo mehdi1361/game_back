@@ -17,6 +17,8 @@ from django.conf.urls import url, include
 from django.contrib import admin
 from api.urls import router
 from rest_framework_jwt.views import obtain_jwt_token
+from django.conf.urls.static import static
+from django.conf import settings
 
 urlpatterns = [
     url(r'^jet/', include('jet.urls', 'jet')),  # Django JET URLS
@@ -24,3 +26,5 @@ urlpatterns = [
     url(r'^api/', include(router.urls)),
     url(r'^login/', obtain_jwt_token),
 ]
+
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
