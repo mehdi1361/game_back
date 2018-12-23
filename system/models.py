@@ -1,3 +1,6 @@
+import os
+
+from common.helper import OverwriteStorage
 from django.db import models
 from base.models import Base
 from django.utils.translation import ugettext_lazy as _
@@ -97,8 +100,12 @@ class PurchaseLog(Base):
         return '{}'.format(self.store_purchase_token)
 
 
+def image_path(instance, filename):
+    return os.path.join('some_dir', str(instance.some_identifier), 'filename.ext')
+
+
 class ConfigFile(Base):
-    file_config = models.FileField(_('file config'), upload_to='config', null=True)
+    file_config = models.FileField(_('file config'), max_length=200, upload_to='config', null=True, storage=OverwriteStorage())
 
     class Meta:
         db_table = 'config_file'
@@ -107,3 +114,4 @@ class ConfigFile(Base):
 
     def __str__(self):
         return '{}'.format(self.id)
+
