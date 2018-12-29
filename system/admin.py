@@ -17,7 +17,7 @@ class GameAdmin(admin.ModelAdmin):
         'level_2_complete_reward',
         'level_3_complete_reward',
         'game_id',
-        'bundle_version'
+        'update_step'
     ]
 
     list_editable = [
@@ -27,7 +27,7 @@ class GameAdmin(admin.ModelAdmin):
         'level_2_complete_reward',
         'level_3_complete_reward',
         'game_id',
-        'bundle_version'
+        'update_step'
     ]
 
 
