@@ -40,7 +40,7 @@ class Game(Base):
     level_2_complete_reward = models.PositiveIntegerField(_('جایزه مرحله دوم'), default=20)
     level_3_complete_reward = models.PositiveIntegerField(_('جایزه مرحله  سوم'), default=30)
     game_id = models.PositiveIntegerField(_('کد یکتای بازی'), null=True, blank=True, unique=True)
-    update_step = models.PositiveIntegerField(_('bundle version'), default=0)
+    update_step = models.PositiveIntegerField(_('update step'), default=0)
 
     class Meta:
         db_table = 'game'
