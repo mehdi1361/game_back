@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import SmsSender, Game, Store, Shop, ConfigFile
+from .models import SmsSender, Game, Store, Shop, ConfigFile, Reward
 
 
 @admin.register(SmsSender)
@@ -52,3 +52,9 @@ class ShopAdmin(admin.ModelAdmin):
 class ShopAdmin(admin.ModelAdmin):
     list_display = ['id', 'file_config']
     list_editable = ['file_config', ]
+
+
+@admin.register(Reward)
+class RewardAdmin(admin.ModelAdmin):
+    list_display = ['id', 'inviter_reward', 'register_reward', 'enable']
+    list_editable = ['inviter_reward', 'register_reward', 'enable']

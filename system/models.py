@@ -115,3 +115,16 @@ class ConfigFile(Base):
     def __str__(self):
         return '{}'.format(self.id)
 
+
+class Reward(Base):
+    inviter_reward = models.PositiveIntegerField(_('جایزه دعوت از دوستان'), default=100)
+    register_reward = models.PositiveIntegerField(_('جایزه نصب بازی'), default=100)
+    enable = models.BooleanField(_('فعال'), default=False)
+
+    class Meta:
+        db_table = 'reward_data'
+        verbose_name = _('جوایز')
+        verbose_name_plural = _('جوایز')
+
+    def __str__(self):
+        return '{}'.format(self.id)

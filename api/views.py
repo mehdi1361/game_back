@@ -20,7 +20,7 @@ from rest_framework.permissions import IsAuthenticated
 from .serializers import UserSerializer, ProfileSerializer, ShopSerializer, GameSerializer, GameUserSerializer
 from common.utils import Inline
 from user_info.models import Device, Verification, GameUser, Message
-from system.models import Shop, Store, PurchaseLog, Game
+from system.models import Shop, Store, PurchaseLog, Game, Reward
 from django.conf import settings
 
 
@@ -293,6 +293,7 @@ class ProfileViewSet(DefaultsMixin, AuthMixin, mixins.RetrieveModelMixin,
     def player_info(self, request):
         try:
             game_id = request.data.get('game_id')
+            reward = Reward.objects.filter(enable=True).first()
 
             if game_id is None:
                 raise Exception('game_id not found')
@@ -311,7 +312,7 @@ class ProfileViewSet(DefaultsMixin, AuthMixin, mixins.RetrieveModelMixin,
             result['game_data'] = game_user_serializer.data
             result['first_name'] = game_user.profile.first_name
             result['last_name'] = game_user.profile.last_name
-            result['invite_code_reward'] = settings.INVITE_REWARD
+            result['invite_code_reward'] = reward.inviter_reward
 
             return Response({'id': 200, 'message': result}, status=status.HTTP_200_OK)
 
@@ -341,6 +342,7 @@ class ProfileViewSet(DefaultsMixin, AuthMixin, mixins.RetrieveModelMixin,
     @check_profile()
     def set_invitation_code(self, request):
         try:
+            reward = Reward.objects.filter(enable=True).first()
             invitation_code_id = request.data.get('invitation_code')
 
             if invitation_code_id is None:
@@ -355,10 +357,10 @@ class ProfileViewSet(DefaultsMixin, AuthMixin, mixins.RetrieveModelMixin,
                 raise Exception('inviter_code already exist')
 
             request.user.profile.invitation_code = profile.inviter_code
-            request.user.profile.gem += settings.INVITE_REWARD
+            request.user.profile.gem += reward.inviter_reward
             request.user.profile.save()
 
-            profile.gem += settings.INVITE_REWARD
+            profile.gem += reward.inviter_reward
             profile.save()
 
             serializer = ProfileSerializer(request.user.profile)

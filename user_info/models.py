@@ -5,7 +5,7 @@ from base.models import Base
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth.models import User
 from datetime import datetime
-from system.models import Game
+from system.models import Game, Reward
 from django.db.models import signals
 import pytz
 
@@ -195,7 +195,9 @@ class Message(Base):
 
 def create_user_dependency(sender, instance, created, **kwargs):
     if created:
-        profile = Profile.objects.create(user=instance, gem=100)
+        reward = Reward.objects.filter(enable=True).first()
+
+        profile = Profile.objects.create(user=instance, gem=reward.register_reward)
 
         for game in Game.objects.all():
             GameUser.objects.create(profile=profile, game=game)
