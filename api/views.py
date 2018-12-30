@@ -147,7 +147,7 @@ class ProfileViewSet(DefaultsMixin, AuthMixin, mixins.RetrieveModelMixin,
             user_profile = Profile.objects.filter(name=name)
 
             if user_profile.count() > 0:
-                name = '{}{}'.format(name.encode('utf-8'), str(uuid.uuid1().int >> 5))[:18]
+                name = '{}{}'.format(name, str(uuid.uuid1().int >> 5))[:18]
 
             profile = Profile.objects.get(user=request.user)
             profile.name = name
