@@ -128,6 +128,7 @@ class ProfileViewSet(DefaultsMixin, AuthMixin, mixins.RetrieveModelMixin,
             first_name = request.data.get('first_name')
             last_name = request.data.get('last_name')
             year = request.data.get('year')
+            action_type = request.data.get('action')
 
             if name is None:
                 raise Exception('name not found')
@@ -144,10 +145,18 @@ class ProfileViewSet(DefaultsMixin, AuthMixin, mixins.RetrieveModelMixin,
             if year is None:
                 raise Exception('year not found')
 
+            if action_type is None or action_type not in ["new", "edit"]:
+                raise Exception("action type not found")
+
             user_profile = Profile.objects.filter(name=name)
 
             if user_profile.count() > 0:
-                name = '{}{}'.format(name, str(uuid.uuid1().int >> 5))[:18]
+                if action_type == "new":
+                    name = '{}{}'.format(name, str(uuid.uuid1().int >> 5))[:18]
+
+                else:
+                    return Response({'id': 400, 'message': 'name already exists', 'name': name},
+                                    status=status.HTTP_400_BAD_REQUEST)
 
             profile = Profile.objects.get(user=request.user)
             profile.name = name
