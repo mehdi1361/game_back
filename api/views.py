@@ -154,6 +154,9 @@ class ProfileViewSet(DefaultsMixin, AuthMixin, mixins.RetrieveModelMixin,
                 if action_type == "new":
                     name = '{}{}'.format(name, str(uuid.uuid1().int >> 5))[:18]
 
+                elif action_type == "edit" and request.user.profile.name == name:
+                    pass
+
                 else:
                     return Response({'id': 400, 'message': 'name already exists', 'name': name},
                                     status=status.HTTP_400_BAD_REQUEST)
